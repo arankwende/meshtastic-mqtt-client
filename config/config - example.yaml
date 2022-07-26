@@ -1,0 +1,48 @@
+MQTT:
+    MQTT_ip: 192.168.XXX.XXX
+    MQTT_USER: 'MQTTUSER'
+    MQTT_PW: 'MQTTPASSWORD'
+    HA_BINARY: 'homeassistant/binary_sensor' # MQTT topics for home assistant to automatically detect devices
+    HA_SENSOR: 'homeassistant/sensor'
+    HA_SWITCH: 'homeassistant/switch'
+    TIME_PERIOD: 300 # Time to try to get new sensor values. Set to 0 for one time execution.
+
+TOPICS:
+    POWER: 'server_power_state' #This is to get the server's ON OFF state, if you don't want it just leave an empty string
+    SDR_TYPES: #THESE ARE JUST EXAMPLES OF NAMES FOR THE SENSORS, ITS A DICTIONARY SO THE first part (before :) can be whatever you want, just ensure it matches the value in SDR TYPE for this description.
+        1: 'server_cpu_temp' 
+        2: 'server_system_temp'
+        3:  'server_cpu_fan'
+        4:  'server_bmc_voltage'
+SERVERS:
+      - IPMI_NODENAME: XXXXX 
+        BRAND: ASUS #THIS IS AN ASUS EXAMPLE
+        IPMI_IP: 192.168.XXX.XXX
+        IPMI_USER: 'SERVER IPMI USER'
+        IPMI_PASSWORD: 'SERVER IPMI PASSWORD'
+        SDRS:
+            - SDR_TYPE: 1
+              SDR_CLASS: temperature #THERE ARE THREE CLASSES - temperature fan and voltage
+              SUBCLASS: MB Temp 
+              VALUE: 3.0
+            - SDR_TYPE: 2
+              SDR_CLASS: fan
+              SUBCLASS: XXXX
+              VALUE: XXXX
+            - SDR_TYPE: XXXX
+              SDR_CLASS: voltage
+              SUBCLASS: XXX
+              VALUE: XXX
+      - IPMI_NODENAME: XXXXXXX
+        BRAND: SUPERMICRO #THIS IS A SUPERMICRO EXAMPLE
+        IPMI_IP: 192.168.XXX.XXX
+        IPMI_USER: 'SERVER IPMI USER'
+        IPMI_PASSWORD: 'SERVER IPMI PASSWORD'
+        SDRS: # YOU CAN ADD ALL THE SDRS YOU WAN
+            - SDR_TYPE: XXX
+              VALUE: XXXX
+              SDR_CLASS: XXXX
+            - SDR_TYPE: XXXX
+              VALUE: XXX
+              SDR_CLASS: XXXX
+

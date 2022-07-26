@@ -1,0 +1,3 @@
+#Dockerignore to ignor config files on image build
+*/config
+*.md
