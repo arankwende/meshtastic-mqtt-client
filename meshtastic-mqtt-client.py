@@ -1,7 +1,9 @@
 #!/bin/python 
 # Las dependencias:
+from ast import Not
+from types import NoneType
 import yaml
-import json
+#import json for future version
 import time
 import os
 import sys
@@ -14,7 +16,7 @@ import sqlite3 as sl
 #import sqlalchemy for future version
 import random
 #from queue import Queue
-from logging import NullHandler
+#from logging import NullHandler
 
 #PROTOBUF dependencies copied from joshpirihi/meshtastic-mqtt
 import portnums_pb2 as portnums_pb2
@@ -123,6 +125,10 @@ def decode_message(msg):
             mesh_node_id = str(getattr(decoded_message, "from"))
             if mesh_node_id == mesh_client_id:
                 pass
+        elif getattr(decoded_message, "encrypted") != "b''":
+                    print("Encrypted message received.")
+                    logging.info("Encrypted message received, please check the settings on your Meshtastic uplink device.")
+                    return None
         else:
             mesh_node_full_id = mesh_pb2.User()
             mesh_node_id = str(getattr(decoded_message, "from"))
