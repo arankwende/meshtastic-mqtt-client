@@ -95,7 +95,9 @@ def decode_message(msg):
         full_message = msg.payload
 #I add service envelope decoding from protobuf
         se = mqtt_pb2.ServiceEnvelope()
+
         se.ParseFromString(full_message)
+        #print(dir(se.ParseFromString(full_message)))
         decoded_message = se.packet
 #I use portnums to detect the type of message (text, position or nodeinfo)
         if str(getattr(decoded_message, "encrypted")) != "b''":
@@ -141,22 +143,20 @@ def decode_message(msg):
 def encode_message(message,mesh_channel_id,mesh_gateway_id,mesh_client_id):
     try:
         decoded_message = bytes(message,"ascii")
-#        print(decoded_message)
-
         encoded_message = mesh_pb2.Data()
         encoded_message.portnum = portnums_pb2.TEXT_MESSAGE_APP
         encoded_message.payload = decoded_message
         packet = mesh_pb2.MeshPacket()
         setattr(packet,"from",int(mesh_client_id))
-        setattr(packet,"to",random.getrandbits(32))
+        #setattr(packet,"to",random.getrandbits(32))
+        setattr(packet, "to",4294967295)
         setattr(packet,"id",random.getrandbits(32))
-       # setattr(packet,"rx_time",random.getrandbits(20))
-        setattr(packet,"hop_limit",2)
+        setattr(packet,"rx_time",1658889528)
+        setattr(packet,"hop_limit",3)
         packet.decoded.CopyFrom(encoded_message)
-
         mesh_se = mqtt_pb2.ServiceEnvelope()
         mesh_se.channel_id = mesh_channel_id
-        mesh_se.gateway_id = mesh_gateway_id
+        mesh_se.gateway_id = mesh_client_id
         mesh_se.packet.CopyFrom(packet)
         mesh_se=mesh_se.SerializeToString()
         return mesh_se
