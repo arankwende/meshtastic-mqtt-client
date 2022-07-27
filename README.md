@@ -33,12 +33,16 @@ MQTT:
     MQTT_USER: 'MQTT user'
     MQTT_PW: 'MQTTPASSWORD'
 ```
-Your Meshtastic configuration, basically channel id, client id and gateway id:
+Your Meshtastic configuration, basically channel id, client id and gateway id, as well as the information your client will provide to the network, a client full ID, a long name to identify you, a short name (3 characters) and a mac address:
 
 ```
 MESHTASTIC:
     CHANNEL_ID: 'ShortFast' # the name of your channel
     CLIENT_ID: '12345678' #the id for your program to use
     GATEWAY_ID: '!12345678' # Your gateway's id
+    CLIENT_FULL_ID: '!12345678'
+    LONG_NAME: 'FULL_NAME'
+    SHORT_NAME: 'TEST'
+    MACADDR: '000000000000'
 ```
 And you're set.
