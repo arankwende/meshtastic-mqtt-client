@@ -18,12 +18,12 @@ sudo apt install python3 python3-pip
 ```
 as well as the following modules with pip:
 
-yaml, paho-mqtt and python-daemon (which are all on ports):
+pyyaml, paho-mqtt, pySimpleGUI and protobuf :
 ```
-sudo pip install yaml paho-mqtt pySimpleGUI protobuf
+sudo pip install pyyaml paho-mqtt pySimpleGUI protobuf
 ```
 
-Once installed, just copy this repo (you can use git clone), complete the YAML file and rename it config.yaml in the /config/ folder, make the script executable and run it.There's an example config file (config - example.yaml), you can directly modify and rename it config.yaml.
+Once installed, just copy this repo (you can use git clone), complete the YAML file and rename it config.yaml in the /config/ folder, make the script executable and run it (chmod +x meshtastic-mqtt-client.py and ./meshtastic-mqtt-client.py).There's an example config file (config - example.yaml), you can directly modify and rename it config.yaml.
 It must contain:
 
 An MQTT configuration with IP, user, password, otherwise it will run until:
