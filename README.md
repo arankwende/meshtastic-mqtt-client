@@ -14,7 +14,7 @@ The script requires:
 python and pip to be installed on the server 
 for linux (apt):
 ```
-sudo apt install python3 ipmitool python3-pip
+sudo apt install python3 python3-pip
 ```
 as well as the following modules with pip:
 
