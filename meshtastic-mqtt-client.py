@@ -127,10 +127,19 @@ def decode_message(msg):
                     lon = decoded_packet.longitude_i * 1e-7
                     altitude= decoded_packet.altitude
                     node_time = decoded_packet.time
+                    print(decoded_packet)
                     save_position(lat, lon, altitude, node_time, battery_level, mesh_node_id)
             elif decoded_message.decoded.portnum == portnums_pb2.NODEINFO_APP:
+                #Work in progress
+                decoded_packet=mesh_pb2.Nodeinfo()
+                decoded_packet.ParseFromString(decoded_message.decoded.payload)
                 mesh_node_full_id = mesh_pb2.User()
                 mesh_node_id = str(getattr(decoded_message, "from"))
+                node_full_id = str(getattr(decoded_message, "id"))
+                node_long_name = str(getattr(decoded_message,"long_name"))
+                node_short_name = str(getattr(decoded_message,"short_name"))
+                node_macaddr = str(getattr(decoded_message,"macaddr"))
+                save_node_info(mesh_node_id,node_full_id,node_long_name,node_short_name,node_macaddr)
                 if mesh_node_id == mesh_client_id:
                     pass
             else:
@@ -142,7 +151,7 @@ def decode_message(msg):
         logging.critical(f'There was an error decoding your received message. You get the following error: {exception} ')
 def encode_message(message,mesh_channel_id,mesh_gateway_id,mesh_client_id):
     try:
-        decoded_message = bytes(message,"ascii")
+        decoded_message = bytes(message,"utf-8")
         encoded_message = mesh_pb2.Data()
         encoded_message.portnum = portnums_pb2.TEXT_MESSAGE_APP
         encoded_message.payload = decoded_message
@@ -163,6 +172,36 @@ def encode_message(message,mesh_channel_id,mesh_gateway_id,mesh_client_id):
     except Exception as exception:
         logging.critical(f'There was an error encoding you message. You get the following error: {exception} ')   
 
+def encode_node_info(user_short_name,user_long_name, user_id, user_macaddr):
+    try:
+        decoded_user_id = bytes(user_id,"utf-8")
+        decoded_user_long = bytes(user_short_name,"utf-8")
+        decoded_user_short = bytes(user_short_name,"utf-8")
+        decoded_user_macaddr = bytes(user_macaddr,"utf-8")
+        user_payload = mesh_pb2.User()
+        setattr(packet, "id",decoded_user_id)
+        setattr(packet,"long_name",decoded_user_long )
+        setattr(packet,"short_name",decoded_user_short)
+        setattr(packet,"macaddr",decoded_user_macaddr)
+        encoded_message = mesh_pb2.Data()
+        encoded_message.portnum = portnums_pb2.NODE_INFOAPP
+        encoded_message.payload = user_payload
+        packet = mesh_pb2.MeshPacket()
+        setattr(packet,"from",int(mesh_client_id))
+        #setattr(packet,"to",random.getrandbits(32))
+        setattr(packet, "to",4294967295)
+        setattr(packet,"id",random.getrandbits(32))
+        setattr(packet,"rx_time",1658889528)
+        setattr(packet,"hop_limit",3)
+        packet.decoded.CopyFrom(encoded_message)
+        mesh_se = mqtt_pb2.ServiceEnvelope()
+        mesh_se.channel_id = mesh_channel_id
+        mesh_se.gateway_id = mesh_client_id
+        mesh_se.packet.CopyFrom(packet)
+        mesh_se=mesh_se.SerializeToString()
+        return mesh_se
+    except Exception as exception:
+        logging.critical(f'There was an error encoding you message. You get the following error: {exception} ')   
 def check_id(mesh_node_id):
     try:
         con = sl.connect('config/meshtastic-mqtt-client.db')
@@ -212,6 +251,16 @@ def save_position(lat,lon,altitude,node_time,battery_level,mesh_node_id):
         con.commit()
     except Exception as exception:
         logging.critical(f'There was an error saving your position, the exception is: {exception} ')
+def save_node_info(mesh_node_id,node_full_id,node_long_name,node_short_name,node_macaddr):
+    try:
+        node_id = check_id(mesh_node_id)
+        con = sl.connect('config/meshtastic-mqtt-client.db')
+        cur = con.cursor()
+        cur.execute(f''' INSERT INTO TEXTMESSAGE (node_id,textmessage) VALUES ('{node_id}','{text_message}');''')
+        con.commit()
+    except Exception as exception:
+        logging.critical(f'There was an error saving your text message. The exception is: {exception} ')
+
 def on_publish(client, userdata, mid):
     logging.debug("the published message status:" + str(int(userdata or 0)) + " (0 means published)")
     logging.debug("the published message id is:" + str(mid))
