@@ -159,10 +159,6 @@ def encode_message(message,mesh_channel_id,mesh_gateway_id,mesh_client_id):
         mesh_se.gateway_id = mesh_gateway_id
         mesh_se.packet.CopyFrom(packet)
         mesh_se=mesh_se.SerializeToString()
-        #print(packet)
-        #mesh_se=mesh_se.encode('base64')
-
-        #mesh_se = mesh_se.SerializeToString()
         return mesh_se
     except Exception as exception:
         logging.critical(f'There was an error encoding you message. You get the following error: {exception} ')   
@@ -189,7 +185,6 @@ def check_id(mesh_node_id):
         logging.critical(f' There was a problem getting your node id. The exception is: {exception} ')
 def save_full_message(full_message,mesh_node_id):
     try:
-        #full_message=re.escape(full_message)
         node_id = check_id(mesh_node_id)
         con = sl.connect('config/meshtastic-mqtt-client.db')
         cur = con.cursor()
