@@ -98,42 +98,44 @@ def decode_message(msg):
         se.ParseFromString(full_message)
         decoded_message = se.packet
 #I use portnums to detect the type of message (text, position or nodeinfo)
-        if decoded_message.decoded.portnum == portnums_pb2.TEXT_MESSAGE_APP:
-            text_message = decoded_message.decoded.payload.decode("utf-8")
-            mesh_node_id = str(getattr(decoded_message, "from"))
-            if mesh_node_id == mesh_client_id:
-                pass
-            else:
-                print(mesh_node_id + ": " + text_message)
-                main_window.Refresh()
-            save_text_message(text_message, mesh_node_id)
-        elif decoded_message.decoded.portnum == portnums_pb2.POSITION_APP:
-            mesh_node_id = str(getattr(decoded_message, "from"))
-            if mesh_node_id == mesh_client_id:
-                pass
-            else:
-                decoded_packet = mesh_pb2.Position()
-                decoded_packet.ParseFromString(decoded_message.decoded.payload)
-                battery_level = decoded_packet.battery_level 
-                lat = decoded_packet.latitude_i * 1e-7
-                lon = decoded_packet.longitude_i * 1e-7
-                altitude= decoded_packet.altitude
-                node_time = decoded_packet.time
-                save_position(lat, lon, altitude, node_time, battery_level, mesh_node_id)
-        elif decoded_message.decoded.portnum == portnums_pb2.NODEINFO_APP:
-            mesh_node_full_id = mesh_pb2.User()
-            mesh_node_id = str(getattr(decoded_message, "from"))
-            if mesh_node_id == mesh_client_id:
-                pass
-        elif getattr(decoded_message, "encrypted") != "b''":
+        if str(getattr(decoded_message, "encrypted")) != "b''":
                     print("Encrypted message received.")
+                    logging.info(getattr(decoded_message, "encrypted"))
                     logging.info("Encrypted message received, please check the settings on your Meshtastic uplink device.")
                     return None
         else:
-            mesh_node_full_id = mesh_pb2.User()
-            mesh_node_id = str(getattr(decoded_message, "from"))
-    
-        save_full_message(full_message,mesh_node_id)
+            if decoded_message.decoded.portnum == portnums_pb2.TEXT_MESSAGE_APP:
+                text_message = decoded_message.decoded.payload.decode("utf-8")
+                mesh_node_id = str(getattr(decoded_message, "from"))
+                if mesh_node_id == mesh_client_id:
+                    pass
+                else:
+                    print(mesh_node_id + ": " + text_message)
+                    main_window.Refresh()
+                save_text_message(text_message, mesh_node_id)
+            elif decoded_message.decoded.portnum == portnums_pb2.POSITION_APP:
+                mesh_node_id = str(getattr(decoded_message, "from"))
+                if mesh_node_id == mesh_client_id:
+                    pass
+                else:
+                    decoded_packet = mesh_pb2.Position()
+                    decoded_packet.ParseFromString(decoded_message.decoded.payload)
+                    battery_level = decoded_packet.battery_level 
+                    lat = decoded_packet.latitude_i * 1e-7
+                    lon = decoded_packet.longitude_i * 1e-7
+                    altitude= decoded_packet.altitude
+                    node_time = decoded_packet.time
+                    save_position(lat, lon, altitude, node_time, battery_level, mesh_node_id)
+            elif decoded_message.decoded.portnum == portnums_pb2.NODEINFO_APP:
+                mesh_node_full_id = mesh_pb2.User()
+                mesh_node_id = str(getattr(decoded_message, "from"))
+                if mesh_node_id == mesh_client_id:
+                    pass
+            else:
+                mesh_node_full_id = mesh_pb2.User()
+                mesh_node_id = str(getattr(decoded_message, "from"))
+        
+            save_full_message(full_message,mesh_node_id)
     except Exception as exception:
         logging.critical(f'There was an error decoding your received message. You get the following error: {exception} ')
 def encode_message(message,mesh_channel_id,mesh_gateway_id,mesh_client_id):
