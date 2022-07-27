@@ -1,7 +1,7 @@
 #!/bin/python 
 # Las dependencias:
 from ast import Not
-from types import NoneType
+#from types import NoneType
 import yaml
 #import json for future version
 import time

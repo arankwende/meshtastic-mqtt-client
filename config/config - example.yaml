@@ -6,6 +6,10 @@ MESHTASTIC:
     CHANNEL_ID: 'ShortFast' # the name of your channel
     CLIENT_ID: '12345678' #the id for your program to use
     GATEWAY_ID: '!12345678' # Your gateway's id
+    CLIENT_FULL_ID: '!12345678'
+    LONG_NAME: 'FULL_NAME'
+    SHORT_NAME: 'TEST'
+    MACADDR: '000000000000'
     COMMON_PORTS: 
                   - ["1", "TEXT_MESSAGE_APP"]
                   - ["2", "REMOTE_HARDWARE_APP"]
