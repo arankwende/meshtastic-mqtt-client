@@ -38,8 +38,8 @@ def generate_main_window(menu_def):
              [sg.Output(size=(80,25),key='-OUTPUT_RADIO-')],
              [sg.Button('Send Message to every node  ',key='-SEND-'), sg.InputText(key='-MSGINPUT-'),
              sg.Checkbox('Want Response',key='-WNTRSPTF-')],
-             [sg.Button('Send Message to one node    '),sg.Text('message'),sg.InputText(size=(20,1),key='-NODE_MSG-'),
-                sg.Text('Node'),sg.InputText(size=(10,1),key='-NODE-')],
+             [sg.Button('Send Message to one node    ', key='-SEND_ONE_NODE-'),sg.Text('message'),sg.InputText(size=(20,1),key='-NODE_MSG-'),
+                sg.Text('Node'),sg.Combo(["Please update node list."],size=(10,1),key='-NODELIST-')],
              [sg.Button('Connect to MQTT Server        ', key='-CONNECT-')], [sg.Button('Disconnect from MQTT Server', key='-DISCONNECT-')]]
 
     return sg.Window('Meshtastic MQTT Client', layout, finalize=True, grab_anywhere=True)
@@ -85,6 +85,27 @@ def generate_nodes_window(menu_def,node_list):
                 return sg.Window('List of Known Nodes', layout, finalize=True, keep_on_top=True, grab_anywhere=True)
             except Exception as exception:
                 logging.critical(f"There was a problem generating the nodes window. The exception is {exception}")
+def generate_about_window(menu_def):
+            try:
+                sg.theme('Reddit')
+                sg.set_options(element_padding=(1, 1))
+                headings_list = ["Node Wireless ID", "Node Full ID", "Node Long Name", "Node Short Name", "MacAddress"]
+                layout = [
+                            [sg.Menu(menu_def, tearoff=False, pad=(200, 1))],
+                            [sg.Text('This is a list of detected nodes and their info.', font = ("Arial", 16))]]
+                return sg.Window('List of Known Nodes', layout, finalize=True, keep_on_top=True, grab_anywhere=True)
+            except Exception as exception:
+                logging.critical(f"There was a problem generating the nodes window. The exception is {exception}")
+def generate_help_window(menu_def):
+            try:
+                sg.theme('Reddit')
+                sg.set_options(element_padding=(1, 1))
+                layout = [
+                            [sg.Menu(menu_def, tearoff=False, pad=(200, 1))],
+                            [sg.Text('This program is pretty simple. It connects via MQTT to the server configured on the config.yaml file (if you are not sure about it, you can the configuration by clicking File, Properties). You can send messages by clicking on Send message to every node, after inputting text on the box next to it. You can also send your node information to your network by going to File, Send node info and check all detected nodes by going to Nodes, List Nodes. In order for the program to work, at least ONE node must be connected to the MQTT server (with MQTT uplink and downlink enabled and with NO encryption) and the Meshtastic network! ', font = ("Arial", 12))]]
+                return sg.Window('Help Window', layout, finalize=True, keep_on_top=True, grab_anywhere=True)
+            except Exception as exception:
+                logging.critical(f"There was a problem generating the Help window. The exception is {exception}")
 
 def load_config():
     try:
@@ -237,6 +258,31 @@ def encode_info_message(user_short_name,user_long_name, user_id, user_macaddr):
         return encoded_message
     except Exception as exception:
         logging.critical(f'There was an error encoding the nodeinfo portion of your message. You get the following error: {exception} ')   
+def encode_send_to_node(node_name, encoded_message):
+        try:
+            node_mesh_id = get_id_from_name(node_name)
+            packet = mesh_pb2.MeshPacket()
+            setattr(packet,"from",int(mesh_client_id))
+            #setattr(packet,"to",random.getrandbits(32))
+            setattr(packet, "to",int(node_mesh_id[0]))
+            setattr(packet,"id",random.getrandbits(32))
+            setattr(packet,"rx_time",1658889528)
+            setattr(packet,"hop_limit",3)
+            packet.decoded.CopyFrom(encoded_message)
+            mesh_se = mqtt_pb2.ServiceEnvelope()
+            mesh_se.channel_id = mesh_channel_id
+            mesh_se.gateway_id = mesh_client_id
+            mesh_se.packet.CopyFrom(packet)
+            mesh_se=mesh_se.SerializeToString()
+            return mesh_se
+        except Exception as exception:
+            logging.critical(f'There was an error encoding you message. You get the following error: {exception} ') 
+def get_id_from_name(node_name):
+    con = sl.connect('config/meshtastic-mqtt-client.db')
+    cur = con.cursor()
+    cur.execute(f'''SELECT node_mesh_id FROM NODE WHERE long_name = '{node_name}';''')
+    node_mesh_id = cur.fetchone()
+    return node_mesh_id
 def check_id(mesh_node_id):
     try:
         con = sl.connect('config/meshtastic-mqtt-client.db')
@@ -257,6 +303,7 @@ def check_id(mesh_node_id):
         return node_id
     except Exception as exception:
         logging.critical(f' There was a problem getting your node id. The exception is: {exception} ')
+
 def get_name(node_id):
     con = sl.connect('config/meshtastic-mqtt-client.db')
     cur = con.cursor()
@@ -574,9 +621,22 @@ def main(): # Here i have the main program
                 #If the properties option is clicked, I generate the properties window
                 generate_properties_window(menu_def)
             elif event == 'List Nodes':
-
                 nodes_list = get_node_list()
-                generate_nodes_window(menu_def, nodes_list)                
+                node_name_list=[]
+                for i in nodes_list:
+                    node_name=i[2]
+                    node_name_list.append(node_name)
+                #title_list = [i["name"] for i in file[item]]
+                window['-NODELIST-'].update(values=node_name_list )
+                generate_nodes_window(menu_def, nodes_list) 
+            elif event == '-SEND_ONE_NODE-':
+                message = values['-NODE_MSG-']
+                node_name = values['-NODELIST-']
+                encoded_message = encode_text_message(message)
+                mesh_se = encode_send_to_node(node_name,encoded_message)
+                mqtt_publish_message(mesh_se,mqtt_topic,client,mqtt_ip,mesh_client_id)
+            elif event == 'About..':
+                generate_help_window(menu_def)                
 #We define some arguments to be parsed as well as help messages and description for the script.
 parser = argparse.ArgumentParser(description='This is a simple python GUI that connects to an MQTT server to send and receive messages sent by a Meshtastic MQTT Gateway.')
 parser.add_argument('-i', action='store_true', help='Run once to only create the entities in your MQTT broker (and see them in home assistant), in a silent initialization.')
