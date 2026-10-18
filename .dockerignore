@@ -1,3 +1,10 @@
-#Dockerignore to ignor config files on image build
-*/config
-*.md
+# Keep local config, databases, logs and dev files out of images
+config/
+.git
+.github
+.venv
+tests
+ha-app
+**/__pycache__
+*.sqlite3
+*.log*

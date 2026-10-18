@@ -1,0 +1,22 @@
+# Meshtastic Bridge app configuration. The full reference is in the project README.
+# MQTT_* values come from the Mosquitto broker app automatically.
+
+mqtt:                                  # the broker your Meshtastic gateway uses
+  host: !env MQTT_HOST
+  port: !env MQTT_PORT
+  username: !env MQTT_USERNAME
+  password: !env MQTT_PASSWORD
+  root_topic: msh/US                   # your gateway's MQTT root topic
+
+meshtastic:
+  channel: Home                        # your private channel's name
+  key: 'PASTE-YOUR-CHANNEL-KEY-HERE'   # from the Meshtastic app; must be a generated key
+  node_id: '!c0ffee01'                 # any unused ID for this bridge
+  long_name: 'Home Assistant'
+  short_name: 'HA'
+
+homeassistant:                         # uses the broker above unless you add mqtt: here
+  nodes: []                            # e.g. ['!5e550001'] to turn nodes into devices
+  assist:
+    enabled: false                     # set true and list your phone's node ID
+    allowed_nodes: []

@@ -1,4 +1,11 @@
-
-config.yaml
-meshtastic-mqtt-client.db
-meshtastic-mqtt-client.log
+config/config.yaml
+config/*.sqlite3
+config/*.db
+config/*.log*
+*.sqlite3
+*.log
+__pycache__/
+*.egg-info/
+.venv/
+build/
+dist/

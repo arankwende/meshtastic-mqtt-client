@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "meshtastic-mqtt-client"
+dynamic = ["version"]
+description = "Desktop and headless client for Meshtastic networks bridged to MQTT"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = [
+    "meshtastic>=2.5",
+    "paho-mqtt>=2.0",
+    "cryptography>=41",
+    "PyYAML>=6",
+    "FreeSimpleGUI>=5.1",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[project.scripts]
+meshtastic-mqtt-client = "meshtastic_mqtt_client.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/arankwende/meshtastic-mqtt-client"
+
+[tool.setuptools.dynamic]
+version = { attr = "meshtastic_mqtt_client.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["meshtastic_mqtt_client*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

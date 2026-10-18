@@ -1,0 +1,11 @@
+# Copy to docker-compose.yaml, put your config.yaml (and secrets.yaml) in ./config,
+# then: docker compose up -d
+services:
+  meshtastic-bridge:
+    build: .
+    restart: unless-stopped
+    volumes:
+      - ./config:/config
+    environment:
+      # Optional: referenced from config.yaml as !env MQTT_PASSWORD
+      MQTT_PASSWORD: change-me

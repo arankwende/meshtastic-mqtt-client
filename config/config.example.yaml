@@ -1,0 +1,52 @@
+# Copy this file to config/config.yaml and edit it.
+
+mqtt:
+  # The broker your Meshtastic gateway node uplinks to. These are the
+  # credentials of the public Meshtastic broker; use your own broker's here.
+  host: mqtt.meshtastic.org
+  port: 1883
+  username: meshdev
+  password: large4cats
+  tls: false            # true for brokers on port 8883
+  # Must match "Root topic" in your gateway's MQTT settings
+  # (firmware 2.3+ defaults to msh/<REGION>, e.g. msh/US, msh/EU_868, msh/ANZ).
+  root_topic: msh/US
+
+meshtastic:
+  # The channel your gateway uplinks/downlinks, and its PSK as shown in the
+  # app ("AQ==" is the default key; use "" for an unencrypted channel).
+  # Firmware 2.8 sets up new US nodes on LongTurbo instead of LongFast.
+  channel: LongFast
+  key: AQ==
+  # Set to true if the channel has "AEAD" (AES-CCM) encryption turned on.
+  # Only affects what we send; both kinds are decrypted automatically.
+  aead: false
+  # How this client appears on the mesh. Pick any unused 8 hex digit id.
+  node_id: '!c0ffee01'
+  long_name: 'MQTT Desktop Client'
+  short_name: 'MQTC'   # up to 4 characters
+
+storage:
+  # Relative paths are relative to this config file.
+  database: meshtastic-mqtt-client.sqlite3
+
+# Optional Home Assistant bridge; see "Home Assistant" in README.md.
+# homeassistant:
+#   mqtt:                      # leave out to use the mqtt: broker above
+#     host: 192.168.1.10
+#     username: meshbridge
+#     password: secret
+#   nodes: ['!5e550001']       # nodes that become Home Assistant devices
+#   sensors:
+#     tank: {unit_of_measurement: '%', icon: 'mdi:water'}
+#   assist:
+#     enabled: true            # assist, alerts and controls need a private channel key
+#     allowed_nodes: ['!a1b2c3d4']
+#   alerts:
+#     nodes: ['!a1b2c3d4']
+#   controls:
+#     '!5e550001':
+#       - {key: pump, type: switch}
+#
+# Passwords and keys can also come from secrets.yaml (password: !secret mqtt_password)
+# or from environment variables (password: !env MQTT_PASSWORD).
