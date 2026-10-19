@@ -131,7 +131,7 @@ class App:
         self._destinations: dict[str, int] = {EVERYONE: BROADCAST}
         self._node_table: list[int] = []
         self._nodes_dirty = True
-        self._last_refresh = 0.0
+        self._last_refresh = float("-inf")
         self._title = f"Meshtastic MQTT Client {__version__}"
         self._unread = 0
 

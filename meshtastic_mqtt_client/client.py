@@ -137,7 +137,7 @@ class MeshClient:
         self._status_listeners: list[Callable[[bool, str], None]] = [on_status] if on_status else []
         self._dedup = Deduplicator()
         self._announced = False
-        self._last_nodeinfo_reply = 0.0
+        self._last_nodeinfo_reply = float("-inf")  # monotonic() starts near 0 at boot
         self._pending_lock = threading.Lock()
         self._pending: dict[int, tuple[threading.Event, list[str]]] = {}
 

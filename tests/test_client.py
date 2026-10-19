@@ -185,3 +185,10 @@ def test_search_messages_treats_wildcards_literally(client, other_mesh, storage)
     assert [m.text for m in storage.search_messages("_level")] == ["tank_level ok"]
     assert [m.text for m in storage.search_messages("%")] == ["tank at 50%"]
     assert [m.text for m in storage.search_messages("\\")] == ["C:\\path"]
+
+
+def test_nodeinfo_answered_right_after_boot(client, other_mesh, monkeypatch):
+    # time.monotonic() counts from boot, so it is small on a freshly started machine.
+    monkeypatch.setattr("meshtastic_mqtt_client.client.time.monotonic", lambda: 5.0)
+    client.handle_payload(protocol.encode_nodeinfo(other_mesh, want_response=True)[1])
+    assert client._mqtt.publish.call_count == 1
